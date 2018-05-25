@@ -19,7 +19,7 @@ def parse_args():
 
 
     parser.add_argument('--dataset', type=str, default='mnist', choices=['mnist', 'robot_world'], help='The name of dataset')
-    parser.add_argument('--dataset_path', type=str, default='/home/williamb/project/bigan_implementation/m_bigan_learner/racecar_dataset')
+    parser.add_argument('--dataset_path', type=str, default='.')
     parser.add_argument('--gpu_mode', type=bool, default=True)
 
     # logging
@@ -91,9 +91,7 @@ def main():
     print(" [*] Training finished!")
 
     bigan.save_model()
-
-
-    bigan.plot_states()
+    #bigan.plot_states() #do not know if it is needed
 
 if __name__ == '__main__':
     main()

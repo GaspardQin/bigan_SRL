@@ -6,12 +6,13 @@ import torch.nn.functional as F
 from torch.autograd import Variable
 from torch.optim import Adam
 from torchvision import datasets, transforms
+from torch.distributions.multivariate_normal import MultivariateNormal
 import utils
 import torch.optim as optim
 from torch.utils.data import DataLoader
 from torchvision import datasets, transforms
 from itertools import *
-from tensorflow.examples.tutorials.mnist import input_data
+#from tensorflow.examples.tutorials.mnist import input_data
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 import numpy as np
@@ -57,6 +58,7 @@ class RobotWorld:
         path = dataset_path + '/simple_navigation_task_train.npz'
         training_data = np.load(path)
 
+        # Observations' shape is (n, 768), n is the num of pictures, 768 is 16*16*3
         observations, actions = training_data['observations'], training_data['actions']
         rewards, episode_starts = training_data['rewards'], training_data['episode_starts']
         obs_dim = reduce(lambda x,y: x*y, observations.shape[1:])
@@ -93,7 +95,7 @@ class RobotWorld:
 
         # indices for all time steps where the episode continues
         indices = np.array([i for i in range(num_samples)], dtype='int64')
-        np.random.shuffle(indices)
+        np.random.shuffle(indices) # change indices order randomly
 
         # split indices into minibatches
         self.minibatchlist = [np.array(sorted(indices[start_idx:start_idx + self.batch_size]))
@@ -246,7 +248,8 @@ class BIGAN(object):
 
                 if self.gpu_mode:
                     # sample z
-                    z = Variable(torch.rand(self.batch_size, self.z_dim)).cuda()
+                    #z = Variable(torch.rand(self.batch_size, self.z_dim)).cuda()
+                    z = Variable(MultivariateNormal(torch.zeros(self.batch_size, self.z_dim)).cuda()
                     # X is a real image from the dataset
                     X = data
                     X = Variable(X).cuda()
@@ -516,7 +519,7 @@ class BIGAN(object):
             self.D.cuda()
             self.E.cuda()
 
-    def plot_states(self, i):
+    def plot_states(self,i):
         # plot the representation of the latent space by running through all the evaluation dataset_transform
         if self.dataset == 'robot_world':
             test_data = np.load(self.dataset_path + '/simple_navigation_task_test.npz')
@@ -543,7 +546,7 @@ class BIGAN(object):
             print("NUM SAMPLES IS " + str(num_samples))
 
             # indices for all time steps where the episode continues
-            indices = np.array([i for i in range(num_samples)], dtype='int64')
+            indices = np.array([ii for ii in range(num_samples)], dtype='int64')
 
             # split indices into minibatches
             minibatchlist = [np.array(sorted(indices[start_idx:start_idx + self.batch_size]))
